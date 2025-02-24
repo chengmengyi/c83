@@ -1,0 +1,25 @@
+include: package:lint/analysis_options_package.yaml
+analyzer:
+  strong-mode:
+    implicit-casts: false
+  exclude:
+    - lib/**/*.g.dart
+    - example/**
+linter:
+  rules:
+    prefer_const_constructors: false
+    always_put_required_named_parameters_first: false
+    avoid_classes_with_only_static_members: false
+    sort_constructors_first: true
+    prefer_single_quotes: true
+    prefer_double_quotes: false
+    public_member_api_docs: false
+    always_specify_types: false
+    lines_longer_than_80_chars: false
+    always_declare_return_types: false
+    prefer_const_literals_to_create_immutables: false
+    prefer_const_constructors_in_immutables: false
+    type_annotate_public_apis: false
+    # activate this one later on
+    constant_identifier_names: false
+    sort_pub_dependencies: false
