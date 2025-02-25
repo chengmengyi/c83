@@ -17,7 +17,7 @@ import 'package:ft_base/util/event/event_result.dart';
 import 'package:ft_base/util/util.dart';
 
 class FruitMatchController extends BaseController with GetTickerProviderStateMixin{
-  var startScratch=false,showDiamondAnimator=false;
+  var startScratch=false,showDiamondAnimator=false,canPlay=true;
   WinnerType winnerType=WinnerType.fruitMatch;
   late WinnerBackBean _winnerBackBean;
   List<WinnerRewardBean> winnerRewardList=[];
@@ -116,14 +116,18 @@ class FruitMatchController extends BaseController with GetTickerProviderStateMix
     return result;
   }
 
-  clickCheckCard(){
-    // if(startScratch){
-    //   return;
-    // }
-    // startScratch=true;
+  clickCheckCard()async{
+    if(startScratch){
+      return;
+    }
+    startScratch=true;
+    if(canPlay){
 
-
-    print("kk===${winnerRewardList.length}");
+    }else{
+      if(!await PlayedNumHep.instance.checkHasNextPlay(winnerType)){
+        RouterUtils.back();
+      }
+    }
   }
 
   onThreshold()async{
@@ -187,9 +191,9 @@ class FruitMatchController extends BaseController with GetTickerProviderStateMix
     key.currentState?.reset();
     await UserInfoHep.instance.updateCanPlayNum(-1,winnerType);
     update(["num"]);
-    var canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
+    canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
     if(!canPlay){
-      RouterUtils.back();
+      update(["check_btn"]);
     }
   }
 

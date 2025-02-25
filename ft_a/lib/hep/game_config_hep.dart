@@ -32,6 +32,9 @@ class GameConfigHep {
     }
   }
 
+  int getMaxLuckNumber()=>_gameConfigBean?.cardsLuckyNumber?.maxNumber??99;
+  int getMaxHighNumber()=>_gameConfigBean?.cardsBettingHigh?.maxNumber??30;
+
   WinnerBackBean getWinnerBean(WinnerType winnerType){
     var bigWin=200,rewardNormal=100;
     List<RewardNumber> rewardNumberList=[];
@@ -58,7 +61,34 @@ class GameConfigHep {
         rewardNumberList.addAll(winnerGame?.rewardNumber??[]);
         rewardMoneyList.addAll(winnerGame?.rewardMoney??[]);
         break;
-
+      case WinnerType.casinoRush:
+        var winnerGame = _gameConfigBean?.cardsCasinoRush;
+        bigWin=winnerGame?.bigwinNumber??200;
+        rewardNormal=winnerGame?.rewardNormal??100;
+        rewardNumberList.addAll(winnerGame?.rewardNumber??[]);
+        rewardMoneyList.addAll(winnerGame?.rewardMoney??[]);
+        break;
+      case WinnerType.winOrLose:
+        var winnerGame = _gameConfigBean?.cardsWinLose;
+        bigWin=winnerGame?.bigwinNumber??200;
+        rewardNormal=winnerGame?.rewardNormal??100;
+        rewardNumberList.addAll(winnerGame?.rewardNumber??[]);
+        rewardMoneyList.addAll(winnerGame?.rewardMoney??[]);
+        break;
+      case WinnerType.luckyNumber:
+        var winnerGame = _gameConfigBean?.cardsLuckyNumber;
+        bigWin=winnerGame?.bigwinNumber??200;
+        rewardNormal=winnerGame?.rewardNormal??100;
+        rewardNumberList.addAll(winnerGame?.rewardNumber??[]);
+        rewardMoneyList.addAll(winnerGame?.rewardMoney??[]);
+        break;
+      case WinnerType.bettingHigh:
+        var winnerGame = _gameConfigBean?.cardsBettingHigh;
+        bigWin=winnerGame?.bigwinNumber??200;
+        rewardNormal=winnerGame?.rewardNormal??100;
+        rewardNumberList.addAll(winnerGame?.rewardNumber??[]);
+        rewardMoneyList.addAll(winnerGame?.rewardMoney??[]);
+        break;
       default:
 
         break;

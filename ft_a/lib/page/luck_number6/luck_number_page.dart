@@ -1,17 +1,18 @@
+import 'package:ft_a/page/luck_number6/luck_number_controller.dart';
+import 'package:ft_base/base/base_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:ft_a/bean/winner_back_bean.dart';
-import 'package:ft_a/page/casino_rush4/casino_rush_controller.dart';
 import 'package:ft_a/widget/play_num_widget.dart';
 import 'package:ft_a/widget/play_top_widget.dart';
 import 'package:ft_a/widget/win_up_widget.dart';
-import 'package:ft_base/base/base_widget.dart';
 import 'package:ft_base/util/util.dart';
 import 'package:ft_base/widget/local_image_widget.dart';
 import 'package:ft_base/widget/text_widget.dart';
 
-class CasinoRushPage extends BaseWidget<CasinoRushController>{
+
+class LuckNumberPage extends BaseWidget<LuckNumberController>{
   @override
-  CasinoRushController createController() => CasinoRushController();
+  LuckNumberController createController() => LuckNumberController();
 
   @override
   Widget createWidget() => WillPopScope(
@@ -57,7 +58,7 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
     height: 440.h,
     child: Stack(
       children: [
-        LocalImageWidget(image: "rush1", width: 312.w, height: 440.h),
+        LocalImageWidget(image: "number1", width: 312.w, height: 440.h),
         Container(
           width: double.infinity,
           height: 248.h,
@@ -80,27 +81,27 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
             onScratchEnd: (){
               ftController.onScratchEnd();
             },
-            image: Image.asset('ft_resource/image/rush2.webp',fit: BoxFit.fill,),
-            child: GetBuilder<CasinoRushController>(
+            image: Image.asset('ft_resource/image/number2.webp',fit: BoxFit.fill,),
+            child: GetBuilder<LuckNumberController>(
               id: "play",
               builder: (_)=>SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: Stack(
                   children: [
-                    LocalImageWidget(image: "rush6", width: double.infinity, height: double.infinity),
-                    LayoutBuilder(
-                      builder: (context,bc){
-                        var maxHeight = bc.maxHeight;
-                        return Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          margin: EdgeInsets.all(4.w),
-                          child: StaggeredGridView.countBuilder(
+                    LocalImageWidget(image: "number3", width: double.infinity, height: double.infinity),
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      margin: EdgeInsets.all(4.w),
+                      child: LayoutBuilder(
+                        builder: (context,bc){
+                          var maxHeight = bc.maxHeight;
+                          return StaggeredGridView.countBuilder(
                             padding: const EdgeInsets.all(0),
                             itemCount: ftController.winnerRewardList.length,
                             shrinkWrap: true,
-                            crossAxisCount: 2,
+                            crossAxisCount: 5,
                             mainAxisSpacing: 0,
                             crossAxisSpacing: 0,
                             physics: const NeverScrollableScrollPhysics(),
@@ -108,39 +109,12 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
                               var bean = ftController.winnerRewardList[index];
                               var indexWhere = ftController.winnerRewardList.indexWhere((element) => element.winType==WinType.diamond);
                               return Container(
-                                height: maxHeight/2,
+                                height: maxHeight/3,
                                 alignment: Alignment.center,
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    SizedBox(
-                                      width: 96.w,
-                                      height: 96.h,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          LocalImageWidget(image: "rush7", width: 96.w, height: 96.h),
-                                          StaggeredGridView.countBuilder(
-                                            padding: const EdgeInsets.all(0),
-                                            itemCount: bean.iconList.length,
-                                            shrinkWrap: true,
-                                            crossAxisCount: 3,
-                                            mainAxisSpacing: 0,
-                                            crossAxisSpacing: 0,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemBuilder: (context,i){
-                                              return Container(
-                                                width: 32.w,
-                                                height: 32.h,
-                                                alignment: Alignment.center,
-                                                child: LocalImageWidget(image: bean.iconList[i], width: 20.w, height: 20.h),
-                                              );
-                                            },
-                                            staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-                                          )
-                                        ],
-                                      ),
-                                    ),
+                                    TextWidget(data: bean.iconList.first, color: bean.winner?"#FFFB24":"#D7DCE1", size: 30.sp,fontWeight: FontWeight.bold,fontFamily: "ft",fontStyle: FontStyle.italic,),
                                     bean.winType==WinType.coins?
                                     TextWidget(data: "${bean.rewardNum}", color: "#FFD725", size: 14.sp,fontWeight: FontWeight.bold,fontStyle: FontStyle.italic,):
                                     Row(
@@ -152,16 +126,15 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
                                         ),
                                         TextWidget(data: "+1", color: "#FFD725", size: 14.sp,fontWeight: FontWeight.bold,fontStyle: FontStyle.italic,),
                                       ],
-                                    ),
-                                    SizedBox(height: 4.h,)
+                                    )
                                   ],
                                 ),
                               );
                             },
                             staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     )
                   ],
                 ),
@@ -180,12 +153,12 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
     ),
   );
 
-  _numWidget()=>GetBuilder<CasinoRushController>(
+  _numWidget()=>GetBuilder<LuckNumberController>(
     id: "num",
     builder: (_)=>PlayNumWidget(winnerType: ftController.winnerType),
   );
 
-  _diamondWidget()=>GetBuilder<CasinoRushController>(
+  _diamondWidget()=>GetBuilder<LuckNumberController>(
     id: "diamond",
     builder: (_){
       var value = ftController.diamondAnimation?.value;
@@ -200,4 +173,5 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
       );
     },
   );
+  
 }

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:ft_a/bean/winner_back_bean.dart';
-import 'package:ft_a/page/casino_rush4/casino_rush_controller.dart';
+import 'package:ft_a/page/betting_high7/betting_high_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:ft_a/widget/play_num_widget.dart';
 import 'package:ft_a/widget/play_top_widget.dart';
 import 'package:ft_a/widget/win_up_widget.dart';
@@ -9,9 +9,9 @@ import 'package:ft_base/util/util.dart';
 import 'package:ft_base/widget/local_image_widget.dart';
 import 'package:ft_base/widget/text_widget.dart';
 
-class CasinoRushPage extends BaseWidget<CasinoRushController>{
+class BettingHighPage extends BaseWidget<BettingHighController>{
   @override
-  CasinoRushController createController() => CasinoRushController();
+  BettingHighController createController() => BettingHighController();
 
   @override
   Widget createWidget() => WillPopScope(
@@ -33,11 +33,14 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
                 SizedBox(height: 20.h,),
                 _numWidget(),
                 SizedBox(height: 10.h,),
-                InkWell(
-                  onTap: (){
-                    ftController.clickCheckCard();
-                  },
-                  child: LocalImageWidget(image: "check_card", width: 268.w, height: 84.h),
+                GetBuilder<BettingHighController>(
+                  id: "check_btn",
+                  builder: (_)=>InkWell(
+                    onTap: (){
+                      ftController.clickCheckCard();
+                    },
+                    child: LocalImageWidget(image: ftController.canPlay?"check_card":"next_card", width: 268.w, height: 84.h),
+                  ),
                 )
               ],
             ),
@@ -57,7 +60,7 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
     height: 440.h,
     child: Stack(
       children: [
-        LocalImageWidget(image: "rush1", width: 312.w, height: 440.h),
+        LocalImageWidget(image: "high1", width: 312.w, height: 440.h),
         Container(
           width: double.infinity,
           height: 248.h,
@@ -80,23 +83,25 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
             onScratchEnd: (){
               ftController.onScratchEnd();
             },
-            image: Image.asset('ft_resource/image/rush2.webp',fit: BoxFit.fill,),
-            child: GetBuilder<CasinoRushController>(
+            image: Image.asset('ft_resource/image/high2.webp',fit: BoxFit.fill,),
+            child: GetBuilder<BettingHighController>(
               id: "play",
               builder: (_)=>SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: Stack(
                   children: [
-                    LocalImageWidget(image: "rush6", width: double.infinity, height: double.infinity),
-                    LayoutBuilder(
-                      builder: (context,bc){
-                        var maxHeight = bc.maxHeight;
-                        return Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          margin: EdgeInsets.all(4.w),
-                          child: StaggeredGridView.countBuilder(
+                    LocalImageWidget(image: "high3", width: double.infinity, height: double.infinity),
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      margin: EdgeInsets.all(4.w),
+                      child: LayoutBuilder(
+                        builder: (context,bc){
+                          var maxWidth = bc.maxWidth;
+                          var maxHeight = bc.maxHeight;
+                          var width = (maxWidth/2-60.w)/2;
+                          return StaggeredGridView.countBuilder(
                             padding: const EdgeInsets.all(0),
                             itemCount: ftController.winnerRewardList.length,
                             shrinkWrap: true,
@@ -107,61 +112,53 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
                             itemBuilder: (context,index){
                               var bean = ftController.winnerRewardList[index];
                               var indexWhere = ftController.winnerRewardList.indexWhere((element) => element.winType==WinType.diamond);
-                              return Container(
-                                height: maxHeight/2,
-                                alignment: Alignment.center,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
+                              return SizedBox(
+                                height: maxHeight/5,
+                                child: Row(
                                   children: [
-                                    SizedBox(
-                                      width: 96.w,
-                                      height: 96.h,
-                                      child: Stack(
-                                        alignment: Alignment.center,
+                                    Container(
+                                      width: width,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      child: TextWidget(data: bean.iconList.first, color: bean.winner?"#FFFB24":"#D7DCE1", size: 22.sp,fontWeight: FontWeight.bold,fontFamily: "ft",fontStyle: FontStyle.italic,),
+                                    ),
+                                    Container(
+                                      width: width,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      child: TextWidget(data: bean.iconList.last, color: bean.winner?"#FFFB24":"#D7DCE1", size: 22.sp,fontWeight: FontWeight.bold,fontFamily: "ft",fontStyle: FontStyle.italic,),
+                                    ),
+                                    Container(
+                                      width: 60.w,
+                                      height: double.infinity,
+                                      alignment: Alignment.center,
+                                      child: bean.winType==WinType.coins?
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          LocalImageWidget(image: "rush7", width: 96.w, height: 96.h),
-                                          StaggeredGridView.countBuilder(
-                                            padding: const EdgeInsets.all(0),
-                                            itemCount: bean.iconList.length,
-                                            shrinkWrap: true,
-                                            crossAxisCount: 3,
-                                            mainAxisSpacing: 0,
-                                            crossAxisSpacing: 0,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemBuilder: (context,i){
-                                              return Container(
-                                                width: 32.w,
-                                                height: 32.h,
-                                                alignment: Alignment.center,
-                                                child: LocalImageWidget(image: bean.iconList[i], width: 20.w, height: 20.h),
-                                              );
-                                            },
-                                            staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-                                          )
+                                          LocalImageWidget(image: "icon_coins", width: 14.w, height: 14.w),
+                                          TextWidget(data: "${bean.rewardNum}", color: "#FFD725", size: 14.sp,fontWeight: FontWeight.bold,fontStyle: FontStyle.italic,),
+                                        ],
+                                      ):
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            key: index==indexWhere?ftController.diamondGlobalKey:null,
+                                            child: LocalImageWidget(image: "icon_diamond", width: 24.w, height: 24.h),
+                                          ),
+                                          TextWidget(data: "+1", color: "#FFD725", size: 14.sp,fontWeight: FontWeight.bold,fontStyle: FontStyle.italic,),
                                         ],
                                       ),
-                                    ),
-                                    bean.winType==WinType.coins?
-                                    TextWidget(data: "${bean.rewardNum}", color: "#FFD725", size: 14.sp,fontWeight: FontWeight.bold,fontStyle: FontStyle.italic,):
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          key: index==indexWhere?ftController.diamondGlobalKey:null,
-                                          child: LocalImageWidget(image: "icon_diamond", width: 24.w, height: 24.h),
-                                        ),
-                                        TextWidget(data: "+1", color: "#FFD725", size: 14.sp,fontWeight: FontWeight.bold,fontStyle: FontStyle.italic,),
-                                      ],
-                                    ),
-                                    SizedBox(height: 4.h,)
+                                    )
                                   ],
                                 ),
                               );
                             },
                             staggeredTileBuilder: (int index) => const StaggeredTile.fit(1),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     )
                   ],
                 ),
@@ -180,12 +177,12 @@ class CasinoRushPage extends BaseWidget<CasinoRushController>{
     ),
   );
 
-  _numWidget()=>GetBuilder<CasinoRushController>(
+  _numWidget()=>GetBuilder<BettingHighController>(
     id: "num",
     builder: (_)=>PlayNumWidget(winnerType: ftController.winnerType),
   );
 
-  _diamondWidget()=>GetBuilder<CasinoRushController>(
+  _diamondWidget()=>GetBuilder<BettingHighController>(
     id: "diamond",
     builder: (_){
       var value = ftController.diamondAnimation?.value;

@@ -1,5 +1,6 @@
+import 'package:ft_base/base/base_controller.dart';
+import 'package:ft_base/util/util.dart';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:ft_a/bean/winner_back_bean.dart';
 import 'package:ft_a/bean/winner_reward_bean.dart';
@@ -10,21 +11,18 @@ import 'package:ft_a/dialog/normal_win/normal_win_dialog.dart';
 import 'package:ft_a/hep/game_config_hep.dart';
 import 'package:ft_a/hep/played_num_hep.dart';
 import 'package:ft_a/hep/user_info_hep.dart';
-import 'package:ft_base/base/base_controller.dart';
 import 'package:ft_base/routers/routers_utils.dart';
 import 'package:ft_base/util/event/event_code.dart';
 import 'package:ft_base/util/event/event_result.dart';
-import 'package:ft_base/util/util.dart';
 
-class WinnerGameController extends BaseController with GetTickerProviderStateMixin{
-  var startScratch=false,showDiamondAnimator=false,canPlay=true;
-  WinnerType winnerType=WinnerType.winnerGame;
+class LuckNumberController extends BaseController with GetTickerProviderStateMixin{
+  var startScratch=false,showDiamondAnimator=false;
+  WinnerType winnerType=WinnerType.luckyNumber;
   late WinnerBackBean _winnerBackBean;
   List<WinnerRewardBean> winnerRewardList=[];
   final key = GlobalKey<ScratcherState>();
   GlobalKey diamondGlobalKey=GlobalKey();
   GlobalKey diamondEndGlobalKey=GlobalKey();
-  final List<String> _allIconList=["winner4","winner5","winner6","winner7","winner8","winner9",];
 
   Offset diamondEndOffset=Offset.zero;
   late AnimationController diamondLottieController;
@@ -50,21 +48,55 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
   @override
   void onReady() {
     super.onReady();
-    _initWinBackBean();
+    _initWinnerBean();
   }
 
-  clickCheckCard()async{
-    if(startScratch){
-      return;
-    }
-    startScratch=true;
-    if(canPlay){
-
-    }else{
-      if(!await PlayedNumHep.instance.checkHasNextPlay(winnerType)){
-        RouterUtils.back();
+  _initWinnerBean(){
+    _winnerBackBean = GameConfigHep.instance.getWinnerBean(winnerType);
+    winnerRewardList.clear();
+    List<int> excludedList=[];
+    if(_winnerBackBean.winNum>0){
+      excludedList.addAll(_getRandomNumbersWithSet(_winnerBackBean.winNum));
+      for (var value in excludedList) {
+        for (int i = 0; i < 3; i++) {
+          winnerRewardList.add(WinnerRewardBean(rewardNum: _winnerBackBean.coinsNum, winType: _winnerBackBean.winType, winner: true, iconList: ["$value"]));
+        }
       }
     }
+    List<int> otherList=[];
+    while(otherList.length<(15-_winnerBackBean.winNum*3)){
+      var number = Random().nextInt(GameConfigHep.instance.getMaxLuckNumber());
+      if(!excludedList.contains(number)){
+        otherList.add(number);
+      }
+    }
+    for(var value in otherList){
+      winnerRewardList.add(WinnerRewardBean(rewardNum: Random().nextInt(_winnerBackBean.rewardNormal), winType: WinType.coins, winner: false, iconList: ["$value"]));
+    }
+    winnerRewardList.shuffle();
+
+    update(["play"]);
+  }
+
+  List<int> _getRandomNumbersWithSet(int length) {
+    Random random = Random();
+    Set<int> numberSet = {};
+    while (numberSet.length < length) {
+      numberSet.add(random.nextInt(GameConfigHep.instance.getMaxLuckNumber()));
+    }
+
+    return numberSet.toList();
+  }
+
+
+  clickCheckCard(){
+    // if(startScratch){
+    //   return;
+    // }
+    // startScratch=true;
+
+
+    print("kk===${winnerRewardList.length}");
   }
 
   onThreshold()async{
@@ -124,22 +156,22 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
 
   _reset()async{
     startScratch=false;
-    _initWinBackBean();
+    _initWinnerBean();
     key.currentState?.reset();
     await UserInfoHep.instance.updateCanPlayNum(-1,winnerType);
     update(["num"]);
-    canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
+    var canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
     if(!canPlay){
-      update(["check_btn"]);
+      RouterUtils.back();
     }
   }
 
   onScratchStart(){
     if(UserInfoHep.instance.getPlayNum(winnerType)<=0){
       RouterUtils.dialog(
-        widget: AddChanceDialog(
-          winnerType: winnerType,
-        )
+          widget: AddChanceDialog(
+            winnerType: winnerType,
+          )
       );
       return;
     }
@@ -157,40 +189,15 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
     RouterUtils.back();
   }
 
-  _initWinBackBean(){
-    _winnerBackBean = GameConfigHep.instance.getWinnerBean(winnerType);
-    winnerRewardList.clear();
-    if(_winnerBackBean.winType==WinType.diamond){
-      while(winnerRewardList.length<_winnerBackBean.winNum){
-        var icon = _allIconList.random();
-        winnerRewardList.add(WinnerRewardBean(rewardNum: 1, winType: WinType.diamond,winner: true,iconList: [icon,icon,icon]));
-      }
-    }else{
-      while(winnerRewardList.length<_winnerBackBean.winNum){
-        var icon = _allIconList.random();
-        winnerRewardList.add(WinnerRewardBean(rewardNum: _winnerBackBean.coinsNum, winType: WinType.coins,winner: true,iconList: [icon,icon,icon]));
-      }
-    }
-    while(winnerRewardList.length<4){
-      var rewardBean = WinnerRewardBean(rewardNum: Random().nextInt(_winnerBackBean.rewardNormal), winType: WinType.coins,winner: false,iconList: randomSelect(_allIconList, 3, 2));
-      if(_winnerBackBean.winType==WinType.diamond){
-        winnerRewardList.insert(0, rewardBean);
-      }else{
-        winnerRewardList.add(rewardBean);
-      }
-    }
-    update(["play"]);
-  }
-
   @override
   EventResult? initEventResult() => EventResult(
-    call: (data){
-      switch(data.code){
-        case EventCode.updatePlayNumA:
-          update(["num"]);
-          break;
+      call: (data){
+        switch(data.code){
+          case EventCode.updatePlayNumA:
+            update(["num"]);
+            break;
+        }
       }
-    }
   );
 
   @override

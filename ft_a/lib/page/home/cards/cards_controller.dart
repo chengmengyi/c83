@@ -1,6 +1,7 @@
 import 'package:ft_a/bean/home_list_bean.dart';
 import 'package:ft_a/bean/played_num_bean.dart';
 import 'package:ft_a/hep/game_config_hep.dart';
+import 'package:ft_a/hep/hep.dart';
 import 'package:ft_a/hep/played_num_hep.dart';
 import 'package:ft_base/base/base_controller.dart';
 import 'package:ft_base/routers/a_routers_name.dart';
@@ -46,23 +47,7 @@ class CardsController extends BaseController{
     var bean = homeList[chooseIndex];
     var canPlay = await PlayedNumHep.instance.checkCanPlay(bean.winnerType);
     if(canPlay){
-      switch(bean.winnerType){
-        case WinnerType.winnerGame:
-          RouterUtils.toNamed(routersName: ARoutersName.winnerGame);
-          break;
-        case WinnerType.fruitMatch:
-          RouterUtils.toNamed(routersName: ARoutersName.fruitMatch);
-          break;
-        case WinnerType.chasingLuck:
-          RouterUtils.toNamed(routersName: ARoutersName.chasingLuck);
-          break;
-        case WinnerType.casinoRush:
-          RouterUtils.toNamed(routersName: ARoutersName.casinoRush);
-          break;
-        default:
-
-          break;
-      }
+      Hep.toPlayPage(bean.winnerType);
     }
   }
 
@@ -72,10 +57,12 @@ class CardsController extends BaseController{
     var bean = homeList[chooseIndex];
     switch(bean.winnerType){
       case WinnerType.winnerGame: return "#FF3333";
-      case WinnerType.fruitMatch:
-      case WinnerType.casinoRush:
-      case WinnerType.chasingLuck: return "#FFF70F";
-      default: return "#FF3333";
+      // case WinnerType.fruitMatch:
+      // case WinnerType.casinoRush:
+      // case WinnerType.winOrLose:
+      // case WinnerType.bettingHigh:
+      // case WinnerType.chasingLuck: return "#FFF70F";
+      default: return "#FFF70F";
     }
   }
 

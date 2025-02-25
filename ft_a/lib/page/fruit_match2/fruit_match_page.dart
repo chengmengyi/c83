@@ -33,11 +33,14 @@ class FruitMatchPage extends BaseWidget<FruitMatchController>{
                 SizedBox(height: 20.h,),
                 _numWidget(),
                 SizedBox(height: 10.h,),
-                InkWell(
-                  onTap: (){
-                    ftController.clickCheckCard();
-                  },
-                  child: LocalImageWidget(image: "check_card", width: 268.w, height: 84.h),
+                GetBuilder<FruitMatchController>(
+                  id: "check_btn",
+                  builder: (_)=>InkWell(
+                    onTap: (){
+                      ftController.clickCheckCard();
+                    },
+                    child: LocalImageWidget(image: ftController.canPlay?"check_card":"next_card", width: 268.w, height: 84.h),
+                  ),
                 )
               ],
             ),

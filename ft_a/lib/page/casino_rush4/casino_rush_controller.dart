@@ -27,7 +27,7 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
   Offset diamondEndOffset=Offset.zero;
   late AnimationController diamondLottieController;
   Animation<Offset>? diamondAnimation;
-  final List<String> _allIconList=["rush2","rush3","rush4"];
+  final List<String> _allIconList=["rush3","rush4","rush5"];
 
 
   @override
@@ -77,28 +77,28 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
     int lineType = random.nextInt(8);
     switch (lineType) {
       case 0:
-        result[0] = result[1] = result[2] = 'rush2';
+        result[0] = result[1] = result[2] = 'rush3';
         break;
       case 1:
-        result[3] = result[4] = result[5] = 'rush2';
+        result[3] = result[4] = result[5] = 'rush3';
         break;
       case 2:
-        result[6] = result[7] = result[8] = 'rush2';
+        result[6] = result[7] = result[8] = 'rush3';
         break;
       case 3:
-        result[0] = result[3] = result[6] = 'rush2';
+        result[0] = result[3] = result[6] = 'rush3';
         break;
       case 4:
-        result[1] = result[4] = result[7] = 'rush2';
+        result[1] = result[4] = result[7] = 'rush3';
         break;
       case 5:
-        result[2] = result[5] = result[8] = 'rush2';
+        result[2] = result[5] = result[8] = 'rush3';
         break;
       case 6:
-        result[0] = result[4] = result[8] = 'rush2';
+        result[0] = result[4] = result[8] = 'rush3';
         break;
       case 7:
-        result[2] = result[4] = result[6] = 'rush2';
+        result[2] = result[4] = result[6] = 'rush3';
         break;
     }
 
@@ -109,7 +109,7 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
       }
     }
 
-    List<String> remainingElements = ['rush3', 'rush4'];
+    List<String> remainingElements = ['rush4', 'rush5'];
     while (availablePositions.isNotEmpty) {
       List<String> validChoices = [];
       for (String element in remainingElements) {
@@ -143,7 +143,7 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
     for (int i = 0; i < 3; i++) {
       int startIndex = i * 3;
       String first = list[startIndex];
-      if (first != 'rush2' && first == list[startIndex + 1] && list[startIndex + 1] == list[startIndex + 2]) {
+      if (first != 'rush3' && first == list[startIndex + 1] && list[startIndex + 1] == list[startIndex + 2]) {
         return false;
       }
     }
@@ -151,18 +151,18 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
     // 检查列
     for (int i = 0; i < 3; i++) {
       String first = list[i];
-      if (first != 'rush2' && first == list[i + 3] && list[i + 3] == list[i + 6]) {
+      if (first != 'rush3' && first == list[i + 3] && list[i + 3] == list[i + 6]) {
         return false;
       }
     }
 
     // 检查对角线
     String topLeft = list[0];
-    if (topLeft != 'rush2' && topLeft == list[4] && list[4] == list[8]) {
+    if (topLeft != 'rush3' && topLeft == list[4] && list[4] == list[8]) {
       return false;
     }
     String topRight = list[2];
-    if (topRight != 'rush2' && topRight == list[4] && list[4] == list[6]) {
+    if (topRight != 'rush3' && topRight == list[4] && list[4] == list[6]) {
       return false;
     }
     return true;
@@ -209,43 +209,6 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
     return true;
   }
 
-  String getRewardIcon(){
-    if(_winnerBackBean.winNum>0){
-      var indexWhere = winnerRewardList.indexWhere((element) => element.winner);
-      if(indexWhere>=0){
-        return winnerRewardList[indexWhere].iconList.first;
-      }else{
-        return "fruit3";
-      }
-    }else{
-      var newList = List.from(_allIconList);
-      for (var value in winnerRewardList) {
-        var first = value.iconList.first;
-        if(newList.contains(first)){
-          newList.remove(first);
-        }
-      }
-      if(newList.isNotEmpty){
-        return newList.first;
-      }
-      return "fruit3";
-    }
-  }
-
-  List<String> getRandomElements(int count) {
-    final random = Random();
-    List<String> result = [];
-    final remaining = List.from(_allIconList);
-
-    while (result.length < count && remaining.isNotEmpty) {
-      final index = random.nextInt(remaining.length);
-      result.add(remaining[index]);
-      remaining.removeAt(index);
-    }
-
-    return result;
-  }
-
   clickCheckCard(){
     // if(startScratch){
     //   return;
@@ -259,7 +222,7 @@ class CasinoRushController extends BaseController with GetTickerProviderStateMix
   onThreshold()async{
     key.currentState?.reveal();
     await Future.delayed(const Duration(milliseconds: 800));
-    // _checkResult();
+    _checkResult();
   }
 
   _checkResult(){

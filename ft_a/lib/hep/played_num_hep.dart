@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:ft_a/bean/played_num_bean.dart';
 import 'package:ft_a/hep/game_config_hep.dart';
+import 'package:ft_a/hep/hep.dart';
 import 'package:ft_base/util/event/event_code.dart';
 import 'package:ft_base/util/event/event_data.dart';
 import 'package:ft_base/util/sql/base_sql_hep.dart';
@@ -39,10 +40,10 @@ class PlayedNumHep {
     await sql.update(SqlTableName.playedNumA, newMap,where: '"id" = ? ',whereArgs: [newMap["id"]]);
   }
 
-  Future<bool> checkCanPlay(WinnerType winnerType)async{
-    if(kDebugMode){
-      return true;
-    }
+  Future<bool> checkCanPlay(WinnerType winnerType,{bool showToastBool=true})async{
+    // if(kDebugMode){
+    //   return true;
+    // }
     var sql = await BaseSqlHep.instance.initSql();
     var list = await sql.query(SqlTableName.playedNumA,where: '"gameType" = ?',whereArgs: [winnerType.name]);
     if(list.isEmpty){
@@ -59,9 +60,32 @@ class PlayedNumHep {
         await sql.update(SqlTableName.playedNumA, newMap,where: '"id" = ? ',whereArgs: [newMap["id"]]);
         return true;
       }
-      showToast("No scratch card, please go to the next level！");
+      if(showToastBool){
+        showToast("No scratch card, please go to the next level！");
+      }
       return false;
     }
     return true;
+  }
+
+  Future<bool> checkHasNextPlay(WinnerType currentType)async{
+    var list = WinnerType.values;
+    var indexWhere = list.indexWhere((element) => element==currentType);
+    if (indexWhere < 0 || indexWhere >= list.length) {
+      return false;
+    }
+    List<WinnerType> firstPart = list.sublist(0, indexWhere);
+    List<WinnerType> secondPart = list.sublist(indexWhere);
+    List<WinnerType> newList = [];
+    newList.addAll(secondPart);
+    newList.addAll(firstPart);
+    for (var value in newList) {
+      var canPlay = await checkCanPlay(value,showToastBool: false);
+      if(canPlay){
+        Hep.toPlayPage(value,offCurrentPage: true);
+        return true;
+      }
+    }
+    return false;
   }
 }
