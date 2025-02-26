@@ -11,6 +11,7 @@ class PlayTopWidget extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       SizedBox(width: 12.w,),
       InkWell(

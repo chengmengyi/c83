@@ -28,7 +28,7 @@ class WinnerGamePage extends BaseWidget<WinnerGameController>{
                       ftController.clickBack();
                     },
                   ),
-                  SizedBox(height: 60.h,),
+                  SizedBox(height: 20.h,),
                   _playWidget(),
                   SizedBox(height: 20.h,),
                   _numWidget(),

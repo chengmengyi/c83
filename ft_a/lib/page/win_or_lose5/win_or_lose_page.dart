@@ -28,7 +28,7 @@ class WinOrLosePage extends BaseWidget<WinOrLoseController>{
                     ftController.clickBack();
                   },
                 ),
-                SizedBox(height: 60.h,),
+                SizedBox(height: 20.h,),
                 _playWidget(),
                 SizedBox(height: 20.h,),
                 _numWidget(),

@@ -21,7 +21,6 @@ class CardsChild extends BaseWidget<CardsController>{
         child: Column(
           children: [
             _topWidget(),
-            SizedBox(height: 16.h,),
             _selListWidget(),
             SizedBox(height: 16.h,),
             _centerWidget(),
@@ -135,6 +134,7 @@ class CardsChild extends BaseWidget<CardsController>{
   );
 
   _topWidget()=>Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       SizedBox(width: 16.w,),
       CoinsWidget(),

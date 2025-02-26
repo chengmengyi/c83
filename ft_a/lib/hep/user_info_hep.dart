@@ -32,9 +32,14 @@ class UserInfoHep{
 
   updateUserDiamond(int add)async{
     var diamondNum = _userInfoBean?.diamondNum??0;
+    var lastLevel = diamondNum~/3;
     _userInfoBean?.diamondNum=diamondNum+add;
     await _saveUserInfo();
     EventData(code: EventCode.updateUserDiamondA).send();
+    var nowLevel = (_userInfoBean?.diamondNum??0)~/3;
+    if(nowLevel>lastLevel){
+      EventData(code: EventCode.showLevelFingerA).send();
+    }
   }
 
   int getUserDiamond()=>_userInfoBean?.diamondNum??0;
