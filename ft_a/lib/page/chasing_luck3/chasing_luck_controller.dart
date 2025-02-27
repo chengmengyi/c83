@@ -7,6 +7,7 @@ import 'package:ft_a/dialog/add_chance/add_chance_dialog.dart';
 import 'package:ft_a/dialog/big_win/big_win_dialog.dart';
 import 'package:ft_a/dialog/no_win/no_win_dialog.dart';
 import 'package:ft_a/dialog/normal_win/normal_win_dialog.dart';
+import 'package:ft_a/hep/auto_scratch.dart';
 import 'package:ft_a/hep/game_config_hep.dart';
 import 'package:ft_a/hep/played_num_hep.dart';
 import 'package:ft_a/hep/user_info_hep.dart';
@@ -17,7 +18,7 @@ import 'package:ft_base/util/event/event_result.dart';
 import 'package:ft_base/util/util.dart';
 
 class ChasingLuckController extends BaseController with GetTickerProviderStateMixin{
-  var startScratch=false,showDiamondAnimator=false;
+  var startScratch=false,showDiamondAnimator=false,canPlay=true;
   WinnerType winnerType=WinnerType.chasingLuck;
   late WinnerBackBean _winnerBackBean;
   List<WinnerRewardBean> winnerRewardList=[];
@@ -29,7 +30,8 @@ class ChasingLuckController extends BaseController with GetTickerProviderStateMi
   late AnimationController diamondLottieController;
   Animation<Offset>? diamondAnimation;
   final List<String> _allIconList=["luck4","luck5","luck6","luck7","luck8","luck9"];
-
+  Offset? iconOffset;
+  AutoScratch? autoScratch;
 
   @override
   void onInit() {
@@ -52,6 +54,7 @@ class ChasingLuckController extends BaseController with GetTickerProviderStateMi
   void onReady() {
     super.onReady();
     _initWinnerBean();
+    autoScratch=AutoScratch(key);
   }
 
   _initWinnerBean(){
@@ -142,17 +145,40 @@ class ChasingLuckController extends BaseController with GetTickerProviderStateMi
     return result;
   }
 
-  clickCheckCard(){
-    // if(startScratch){
-    //   return;
-    // }
-    // startScratch=true;
-
-
-    print("kk===${winnerRewardList.length}");
+  clickCheckCard()async{
+    if(startScratch){
+      return;
+    }
+    if(UserInfoHep.instance.getPlayNum(winnerType)<=0){
+      RouterUtils.dialog(
+          widget: AddChanceDialog(
+            winnerType: winnerType,
+          )
+      );
+      return;
+    }
+    startScratch=true;
+    if(canPlay){
+      autoScratch?.startAuto(
+        key: key,
+        iconOffsetCall: (offset){
+          iconOffset=offset;
+          update(["gold_icon"]);
+        },
+      );
+    }else{
+      if(!await PlayedNumHep.instance.checkHasNextPlay(winnerType)){
+        RouterUtils.back();
+      }
+    }
   }
 
   onThreshold()async{
+    autoScratch?.stopWhile=true;
+    Future.delayed(const Duration(milliseconds: 100),(){
+      iconOffset=null;
+      update(["gold_icon"]);
+    });
     key.currentState?.reveal();
     await Future.delayed(const Duration(milliseconds: 800));
     _checkResult();
@@ -211,12 +237,21 @@ class ChasingLuckController extends BaseController with GetTickerProviderStateMi
     startScratch=false;
     _initWinnerBean();
     key.currentState?.reset();
+    autoScratch?.stopWhile=false;
+    iconOffset=null;
+    update(["gold_icon"]);
     await UserInfoHep.instance.updateCanPlayNum(-1,winnerType);
     update(["num"]);
-    var canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
+    canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
     if(!canPlay){
-      RouterUtils.back();
+      update(["check_btn"]);
     }
+  }
+
+  updateIconOffset(DragUpdateDetails details){
+    var offset = details.localPosition;
+    iconOffset=Offset(offset.dx+(autoScratch?.marginLeft??0), offset.dy+(autoScratch?.marginTop??0));
+    update(["gold_icon"]);
   }
 
   onScratchStart(){

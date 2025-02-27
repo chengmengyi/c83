@@ -85,7 +85,7 @@ class Scratcher extends StatefulWidget {
   final VoidCallback? onScratchStart;
 
   /// Callback called during scratching
-  final VoidCallback? onScratchUpdate;
+  final Function(DragUpdateDetails details)? onScratchUpdate;
 
   /// Callback called when scratching ends
   final VoidCallback? onScratchEnd;
@@ -138,15 +138,15 @@ class ScratcherState extends State<Scratcher> {
                 ? (details) {
                     widget.onScratchStart?.call();
                     if (widget.enabled) {
-                      _addPoint(details.localPosition);
+                      addPoint(details.localPosition);
                     }
                   }
                 : null,
             onPanUpdate: canScratch
                 ? (details) {
-                    widget.onScratchUpdate?.call();
+                    widget.onScratchUpdate?.call(details);
                     if (widget.enabled) {
-                      _addPoint(details.localPosition);
+                      addPoint(details.localPosition);
                     }
                   }
                 : null,
@@ -229,7 +229,7 @@ class ScratcherState extends State<Scratcher> {
     return distance <= radius;
   }
 
-  void _addPoint(Offset position) {
+  void addPoint(Offset position) {
     // Ignore when same point is reported multiple times in a row
     if (_lastPosition == position) {
       return;

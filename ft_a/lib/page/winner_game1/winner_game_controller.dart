@@ -7,6 +7,7 @@ import 'package:ft_a/dialog/add_chance/add_chance_dialog.dart';
 import 'package:ft_a/dialog/big_win/big_win_dialog.dart';
 import 'package:ft_a/dialog/no_win/no_win_dialog.dart';
 import 'package:ft_a/dialog/normal_win/normal_win_dialog.dart';
+import 'package:ft_a/hep/auto_scratch.dart';
 import 'package:ft_a/hep/game_config_hep.dart';
 import 'package:ft_a/hep/played_num_hep.dart';
 import 'package:ft_a/hep/user_info_hep.dart';
@@ -30,6 +31,9 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
   late AnimationController diamondLottieController;
   Animation<Offset>? diamondAnimation;
 
+  Offset? iconOffset;
+  AutoScratch? autoScratch;
+
   @override
   void onInit() {
     super.onInit();
@@ -51,15 +55,30 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
   void onReady() {
     super.onReady();
     _initWinBackBean();
+    autoScratch=AutoScratch(key);
   }
 
   clickCheckCard()async{
     if(startScratch){
       return;
     }
+    if(UserInfoHep.instance.getPlayNum(winnerType)<=0){
+      RouterUtils.dialog(
+          widget: AddChanceDialog(
+            winnerType: winnerType,
+          )
+      );
+      return;
+    }
     startScratch=true;
     if(canPlay){
-
+      autoScratch?.startAuto(
+        key: key,
+        iconOffsetCall: (offset){
+          iconOffset=offset;
+          update(["gold_icon"]);
+        },
+      );
     }else{
       if(!await PlayedNumHep.instance.checkHasNextPlay(winnerType)){
         RouterUtils.back();
@@ -68,6 +87,11 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
   }
 
   onThreshold()async{
+    autoScratch?.stopWhile=true;
+    Future.delayed(const Duration(milliseconds: 100),(){
+      iconOffset=null;
+      update(["gold_icon"]);
+    });
     key.currentState?.reveal();
     await Future.delayed(const Duration(milliseconds: 800));
     _checkResult();
@@ -126,12 +150,21 @@ class WinnerGameController extends BaseController with GetTickerProviderStateMix
     startScratch=false;
     _initWinBackBean();
     key.currentState?.reset();
+    autoScratch?.stopWhile=false;
+    iconOffset=null;
+    update(["gold_icon"]);
     await UserInfoHep.instance.updateCanPlayNum(-1,winnerType);
     update(["num"]);
     canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
     if(!canPlay){
       update(["check_btn"]);
     }
+  }
+
+  updateIconOffset(DragUpdateDetails details){
+    var offset = details.localPosition;
+    iconOffset=Offset(offset.dx+(autoScratch?.marginLeft??0), offset.dy+(autoScratch?.marginTop??0));
+    update(["gold_icon"]);
   }
 
   onScratchStart(){

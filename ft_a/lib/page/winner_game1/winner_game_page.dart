@@ -46,6 +46,7 @@ class WinnerGamePage extends BaseWidget<WinnerGameController>{
               ),
             ),
             _diamondWidget(),
+            _goldWidget(),
           ],
         ),
       ),
@@ -74,9 +75,9 @@ class WinnerGamePage extends BaseWidget<WinnerGameController>{
             onThreshold: (){
               ftController.onThreshold();
             },
-            // onScratchUpdate: (details){
-            //   smController.updateIconOffset(details);
-            // },
+            onScratchUpdate: (details){
+              ftController.updateIconOffset(details);
+            },
             onScratchStart: (){
               ftController.onScratchStart();
             },
@@ -185,6 +186,20 @@ class WinnerGamePage extends BaseWidget<WinnerGameController>{
           margin: EdgeInsets.only(left: dx<=0?0:dx,top: dy<=0?0:dy),
           child: LocalImageWidget(image: "icon_diamond", width: 24.w, height: 24.h),
         ),
+      );
+    },
+  );
+
+  _goldWidget()=>GetBuilder<WinnerGameController>(
+    id: "gold_icon",
+    builder: (_){
+      var left=null==ftController.iconOffset?0.0:ftController.iconOffset?.dx??0.0;
+      var top=null==ftController.iconOffset?0.0:ftController.iconOffset?.dy??0.0;
+      return null==ftController.iconOffset?
+      Container():
+      Container(
+        margin: EdgeInsets.only(left: left<0?0:left,top: top<0?0:top),
+        child: Image.asset("ft_resource/image/coins.png",width: 40,height: 40),
       );
     },
   );

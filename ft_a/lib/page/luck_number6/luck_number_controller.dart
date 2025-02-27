@@ -1,3 +1,4 @@
+import 'package:ft_a/hep/auto_scratch.dart';
 import 'package:ft_base/base/base_controller.dart';
 import 'package:ft_base/util/util.dart';
 import 'dart:math';
@@ -16,7 +17,7 @@ import 'package:ft_base/util/event/event_code.dart';
 import 'package:ft_base/util/event/event_result.dart';
 
 class LuckNumberController extends BaseController with GetTickerProviderStateMixin{
-  var startScratch=false,showDiamondAnimator=false;
+  var startScratch=false,showDiamondAnimator=false,canPlay=true;
   WinnerType winnerType=WinnerType.luckyNumber;
   late WinnerBackBean _winnerBackBean;
   List<WinnerRewardBean> winnerRewardList=[];
@@ -27,6 +28,8 @@ class LuckNumberController extends BaseController with GetTickerProviderStateMix
   Offset diamondEndOffset=Offset.zero;
   late AnimationController diamondLottieController;
   Animation<Offset>? diamondAnimation;
+  Offset? iconOffset;
+  AutoScratch? autoScratch;
 
   @override
   void onInit() {
@@ -49,6 +52,7 @@ class LuckNumberController extends BaseController with GetTickerProviderStateMix
   void onReady() {
     super.onReady();
     _initWinnerBean();
+    autoScratch=AutoScratch(key);
   }
 
   _initWinnerBean(){
@@ -89,17 +93,40 @@ class LuckNumberController extends BaseController with GetTickerProviderStateMix
   }
 
 
-  clickCheckCard(){
-    // if(startScratch){
-    //   return;
-    // }
-    // startScratch=true;
-
-
-    print("kk===${winnerRewardList.length}");
+  clickCheckCard()async{
+    if(startScratch){
+      return;
+    }
+    if(UserInfoHep.instance.getPlayNum(winnerType)<=0){
+      RouterUtils.dialog(
+          widget: AddChanceDialog(
+            winnerType: winnerType,
+          )
+      );
+      return;
+    }
+    startScratch=true;
+    if(canPlay){
+      autoScratch?.startAuto(
+        key: key,
+        iconOffsetCall: (offset){
+          iconOffset=offset;
+          update(["gold_icon"]);
+        },
+      );
+    }else{
+      if(!await PlayedNumHep.instance.checkHasNextPlay(winnerType)){
+        RouterUtils.back();
+      }
+    }
   }
 
   onThreshold()async{
+    autoScratch?.stopWhile=true;
+    Future.delayed(const Duration(milliseconds: 100),(){
+      iconOffset=null;
+      update(["gold_icon"]);
+    });
     key.currentState?.reveal();
     await Future.delayed(const Duration(milliseconds: 800));
     _checkResult();
@@ -158,12 +185,21 @@ class LuckNumberController extends BaseController with GetTickerProviderStateMix
     startScratch=false;
     _initWinnerBean();
     key.currentState?.reset();
+    autoScratch?.stopWhile=false;
+    iconOffset=null;
+    update(["gold_icon"]);
     await UserInfoHep.instance.updateCanPlayNum(-1,winnerType);
     update(["num"]);
-    var canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
+    canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
     if(!canPlay){
-      RouterUtils.back();
+      update(["check_btn"]);
     }
+  }
+
+  updateIconOffset(DragUpdateDetails details){
+    var offset = details.localPosition;
+    iconOffset=Offset(offset.dx+(autoScratch?.marginLeft??0), offset.dy+(autoScratch?.marginTop??0));
+    update(["gold_icon"]);
   }
 
   onScratchStart(){

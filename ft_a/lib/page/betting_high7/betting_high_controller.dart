@@ -1,3 +1,4 @@
+import 'package:ft_a/hep/auto_scratch.dart';
 import 'package:ft_base/base/base_controller.dart';
 import 'package:ft_base/util/util.dart';
 import 'dart:math';
@@ -27,8 +28,9 @@ class BettingHighController extends BaseController with GetTickerProviderStateMi
   Offset diamondEndOffset=Offset.zero;
   late AnimationController diamondLottieController;
   Animation<Offset>? diamondAnimation;
-  final List<String> _allIconList=["red","black"];
 
+  Offset? iconOffset;
+  AutoScratch? autoScratch;
 
   @override
   void onInit() {
@@ -51,6 +53,7 @@ class BettingHighController extends BaseController with GetTickerProviderStateMi
   void onReady() {
     super.onReady();
     _initWinnerBean();
+    autoScratch=AutoScratch(key);
   }
 
   _initWinnerBean(){
@@ -85,9 +88,23 @@ class BettingHighController extends BaseController with GetTickerProviderStateMi
     if(startScratch){
       return;
     }
+    if(UserInfoHep.instance.getPlayNum(winnerType)<=0){
+      RouterUtils.dialog(
+          widget: AddChanceDialog(
+            winnerType: winnerType,
+          )
+      );
+      return;
+    }
     startScratch=true;
     if(canPlay){
-
+      autoScratch?.startAuto(
+        key: key,
+        iconOffsetCall: (offset){
+          iconOffset=offset;
+          update(["gold_icon"]);
+        },
+      );
     }else{
       if(!await PlayedNumHep.instance.checkHasNextPlay(winnerType)){
         RouterUtils.back();
@@ -96,6 +113,11 @@ class BettingHighController extends BaseController with GetTickerProviderStateMi
   }
 
   onThreshold()async{
+    autoScratch?.stopWhile=true;
+    Future.delayed(const Duration(milliseconds: 100),(){
+      iconOffset=null;
+      update(["gold_icon"]);
+    });
     key.currentState?.reveal();
     await Future.delayed(const Duration(milliseconds: 800));
     _checkResult();
@@ -154,6 +176,9 @@ class BettingHighController extends BaseController with GetTickerProviderStateMi
     startScratch=false;
     _initWinnerBean();
     key.currentState?.reset();
+    autoScratch?.stopWhile=false;
+    iconOffset=null;
+    update(["gold_icon"]);
     await UserInfoHep.instance.updateCanPlayNum(-1,winnerType);
     update(["num"]);
     canPlay = await PlayedNumHep.instance.checkCanPlay(winnerType);
@@ -183,6 +208,12 @@ class BettingHighController extends BaseController with GetTickerProviderStateMi
       return;
     }
     RouterUtils.back();
+  }
+
+  updateIconOffset(DragUpdateDetails details){
+    var offset = details.localPosition;
+    iconOffset=Offset(offset.dx+(autoScratch?.marginLeft??0), offset.dy+(autoScratch?.marginTop??0));
+    update(["gold_icon"]);
   }
 
   @override
